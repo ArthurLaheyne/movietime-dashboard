@@ -4,11 +4,19 @@ export const formatDateToLocal = (
 ) => {
   dateStr = dateStr ?? 0
   const date = new Date(dateStr);
+
+  var today = new Date();
+  var isToday = (today.toDateString() == date.toDateString());
   
-  const options: Intl.DateTimeFormatOptions = {
+  let options: Intl.DateTimeFormatOptions = {
     dateStyle: 'short',
     timeStyle: 'short',
   };
+  if (isToday) {
+    options = {
+      timeStyle: 'short',
+    };
+  }
   const formatter = new Intl.DateTimeFormat(locale, options);
   return formatter.format(date);
 };

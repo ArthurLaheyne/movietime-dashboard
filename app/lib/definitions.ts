@@ -12,3 +12,9 @@ export type MovieSeen = {
   datetime: string;
   movie: number;
 };
+export type Logs = {
+  id: string;
+  user: string;
+  datetime: string;
+  action: string;
+};

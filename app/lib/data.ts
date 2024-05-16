@@ -33,12 +33,31 @@ export async function fetchMoviesSeen() {
       },
     })
     const data = await res.json()
-    console.log(data.Items);
     
     return data.Items
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch movies seen.');
+  }
+}
+
+export async function fetchLogs() {
+  // Add noStore() here to prevent the response from being cached.
+  // This is equivalent to in fetch(..., {cache: 'no-store'}).
+  noStore();
+
+  try {
+    const res = await fetch('https://hufyvhlacb.execute-api.us-west-2.amazonaws.com/logs', {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    })
+    const data = await res.json()
+    
+    return data.Items
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch logs.');
   }
 }
 

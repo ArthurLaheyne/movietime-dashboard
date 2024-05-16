@@ -1,10 +1,9 @@
-import { fetchMoviesSeen } from "@/app/lib/data";
-import { MovieSeen } from '@/app/lib/definitions';
+import { fetchLogs } from "@/app/lib/data";
+import { Logs } from '@/app/lib/definitions';
 import { formatDateToLocal } from '@/app/lib/utils';
-import MovieLink from "./MovieLink";
 
 export default async function TableMoviesSeen() {
-  const likeds = await fetchMoviesSeen();
+  const logs = await fetchLogs();
 
   return (
     <div className="mt-6 flow-root">
@@ -25,19 +24,19 @@ export default async function TableMoviesSeen() {
               </tr>
             </thead>
             <tbody className="bg-white">
-              {likeds?.map((liked: MovieSeen) => (
+              {logs?.map((log: Logs) => (
                 <tr
-                  key={liked.user + "-" + liked.movie}
+                  key={log.id}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                 >
                   <td className="whitespace-nowrap px-3 py-3">
-                    {liked.user}
+                    {log.user}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    <MovieLink movie={liked.movie}/>
+                    {log.action}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {formatDateToLocal(liked.datetime)}
+                    {formatDateToLocal(log.datetime)}
                   </td>
                 </tr>
               ))}
