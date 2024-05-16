@@ -5,6 +5,17 @@ import TableLogs from "@/app/ui/TableLogs";
 import ChartLogs from "@/app/ui/ChartLogs";
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
+import Container from '@mui/material/Container';
+import { red } from '@mui/material/colors';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#2a2827",
+    },
+  },
+});
 
 export default function DataTable() {
 
@@ -36,17 +47,19 @@ export default function DataTable() {
   }, [])
 
   return (
-    <>
-      <Box sx={{ marginBottom: 3 }}>
-        <Paper elevation={3} >
-          <ChartLogs logs={logs} />
-        </Paper>
-      </Box>
-      <Box>
-        <Paper elevation={3} >
-          <TableLogs logs={logs} isLoading={isLoading} />
-        </Paper>
-      </Box>
-    </>
-  );
+    <ThemeProvider theme={theme}>
+      <Container maxWidth="md">
+        <Box sx={{ marginBottom: 3 }}>
+          <Paper elevation={3} >
+            <ChartLogs logs={logs} />
+          </Paper>
+        </Box>
+        <Box>
+          <Paper elevation={3} >
+            <TableLogs logs={logs} isLoading={isLoading} />
+          </Paper>
+        </Box>
+      </Container>
+    </ThemeProvider>
+  )
 }

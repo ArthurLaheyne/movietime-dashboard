@@ -51,9 +51,15 @@ export default function BasicBars({
 
   return (
     <BarChart
-      xAxis={[{ scaleType: 'band', data: last24Hours }]}
-      yAxis={[{ max: 100 }]}
-      series={[{ data: count }]}
+      xAxis={[{
+        scaleType: 'band',
+        data: last24Hours
+      }]}
+      yAxis={[{ 
+        max: 20,
+      }]}
+      borderRadius={5}
+      series={[{ data: count, color: '#dbbc00' }]}
       height={300}
     />
   );

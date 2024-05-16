@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className} style={{ background: "linear-gradient(121deg, rgba(42,40,39,1) 0%, rgba(83,83,83,1) 100%)" }}>{children}</body>
     </html>
   );
 }
