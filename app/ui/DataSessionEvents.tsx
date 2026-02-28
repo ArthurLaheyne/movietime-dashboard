@@ -32,8 +32,10 @@ function normalizeItems(payload: unknown): unknown[] {
 
 function toRows(items: unknown[]): SessionEventRow[] {
   return items.map((item, index) => {
-    const row =
-      item && typeof item === 'object' ? { ...(item as Record<string, unknown>) } : { value: item };
+    const row: Record<string, unknown> =
+      item && typeof item === 'object'
+        ? { ...(item as Record<string, unknown>) }
+        : { value: item };
 
     for (const key of Object.keys(row)) {
       const value = row[key];
@@ -47,7 +49,7 @@ function toRows(items: unknown[]): SessionEventRow[] {
       (typeof row.sk === 'string' && row.sk) ||
       `${index}-${String(row.ts ?? row.name ?? 'event')}`;
 
-    return { id, ...row };
+    return { id, ...row } as SessionEventRow;
   });
 }
 

@@ -41,36 +41,60 @@ function extractSessionId(row: Record<string, unknown>) {
   return undefined;
 }
 
+const formatDateMs = (v: unknown) => {
+  const n = typeof v === 'number' ? v : Number(v);
+  if (!Number.isFinite(n) || n <= 0) return '-';
+  return new Date(n).toLocaleString();
+};
+
 export type SessionRow = {
   id: string;
   sessionId?: string;
-  [key: string]: unknown;
+
+  // Champs visibles
+  userId: string;
+  eventCount: number;
+  context: string;
+  firstSeen: string;
+  lastSeen: string;
 };
 
 function toGridRows(items: unknown[]): SessionRow[] {
   return items.map((item, index) => {
-    const row =
-      item && typeof item === 'object' ? { ...(item as Record<string, unknown>) } : { value: item };
+    const raw =
+      item && typeof item === 'object'
+        ? (item as Record<string, unknown>)
+        : ({ value: item } as Record<string, unknown>);
 
-    const sessionId = extractSessionId(row);
-    if (sessionId) {
-      row.sessionId = sessionId;
-    }
+    const sessionId = extractSessionId(raw);
 
-    for (const key of Object.keys(row)) {
-      const value = row[key];
-      if (value && typeof value === 'object') {
-        row[key] = JSON.stringify(value);
-      }
-    }
+    const userId =
+      (typeof raw.userId === 'string' && raw.userId.trim()) ? raw.userId : 'anonymous';
 
-    const id =
-      (typeof row.id === 'string' && row.id) ||
-      (typeof row.sessionId === 'string' && row.sessionId) ||
-      (typeof row.pk === 'string' && row.pk) ||
-      `${index}-${String(row.ts ?? row.lastTs ?? row.createdAt ?? 'session')}`;
+    const eventCount =
+      typeof raw.eventCount === 'number'
+        ? raw.eventCount
+        : Number(raw.eventCount ?? 0) || 0;
 
-    return { id, ...row };
+    const context =
+      raw.context && typeof raw.context === 'object'
+        ? JSON.stringify(raw.context)
+        : (typeof raw.context === 'string' ? raw.context : '{}');
+
+    const firstSeen = formatDateMs(raw.firstSeenAt);
+    const lastSeen = formatDateMs(raw.lastSeenAt);
+
+    const id = sessionId || `${index}`;
+
+    return {
+      id,
+      sessionId,
+      userId,
+      eventCount,
+      context,
+      firstSeen,
+      lastSeen,
+    };
   });
 }
 

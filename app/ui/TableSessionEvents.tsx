@@ -98,7 +98,7 @@ export default function TableSessionEvents({
       // Display a readable date, but keep the underlying value as a Date.
       ...(isDate
         ? {
-            valueFormatter: (value) => {
+            valueFormatter: (value: unknown) => {
               const d = value instanceof Date ? value : parseUnknownToDate(value);
               if (!d) return '';
               try {

@@ -6,24 +6,6 @@ import { useRouter } from 'next/navigation';
 import { formatDateToLocal } from '@/app/lib/utils';
 import type { SessionRow } from '@/app/ui/DataSessions';
 
-function prettifyHeader(key: string) {
-  return key
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/[_-]+/g, ' ')
-    .replace(/^./, (s) => s.toUpperCase());
-}
-
-function looksLikeDateField(key: string) {
-  const normalized = key.toLowerCase();
-  return (
-    normalized.endsWith('ts') ||
-    normalized === 'ts' ||
-    normalized.endsWith('at') ||
-    normalized.includes('date') ||
-    normalized.includes('datetime')
-  );
-}
-
 function safeFormatDate(input: string) {
   const parsed = new Date(input);
   if (Number.isNaN(parsed.getTime())) return input;
@@ -34,21 +16,11 @@ function safeFormatDate(input: string) {
   }
 }
 
-function formatCellValue(key: string, value: unknown) {
-  if (value == null) return '';
-
-  if (looksLikeDateField(key)) {
-    if (typeof value === 'number') {
-      const maybeMs = value > 1_000_000_000_000 ? value : value * 1000;
-      return safeFormatDate(String(maybeMs));
-    }
-    if (typeof value === 'string') {
-      return safeFormatDate(value);
-    }
-  }
-
-  if (typeof value === 'boolean') return value ? 'true' : 'false';
-  return String(value);
+function formatMsToLocalString(value: unknown) {
+  if (value == null) return '-';
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n) || n <= 0) return '-';
+  return safeFormatDate(String(n));
 }
 
 export default function TableSessions({
@@ -60,30 +32,59 @@ export default function TableSessions({
 }) {
   const router = useRouter();
 
-  const keys = Array.from(new Set(sessions.flatMap((row) => Object.keys(row)))).filter(
-    (key) => key !== 'id',
-  );
-
-  const priority = ['sessionId', 'userId', 'count', 'eventCount', 'firstTs', 'lastTs', 'lastEventAt'];
-  keys.sort((a, b) => {
-    const ia = priority.indexOf(a);
-    const ib = priority.indexOf(b);
-    if (ia !== -1 || ib !== -1) {
-      return (ia === -1 ? Number.MAX_SAFE_INTEGER : ia) - (ib === -1 ? Number.MAX_SAFE_INTEGER : ib);
-    }
-    return a.localeCompare(b);
-  });
-
-  const columns: GridColDef[] = keys.map((key) => ({
-    field: key,
-    headerName: prettifyHeader(key),
-    flex: 1,
-    minWidth: 140,
-    valueGetter: (value, row) => formatCellValue(key, row[key]),
-  }));
+  // Fixed columns: UserId, EventCount, Context, FirstSeen, LastSeen
+  // Supports both shapes:
+  // - { firstSeen, lastSeen } formatted strings (recommended)
+  // - { firstSeenAt, lastSeenAt } timestamps (ms)
+  const columns: GridColDef[] = [
+    {
+      field: 'userId',
+      headerName: 'UserId',
+      flex: 1,
+      minWidth: 180,
+      valueGetter: (_value, row) => String((row as any).userId ?? 'anonymous'),
+    },
+    {
+      field: 'eventCount',
+      headerName: 'EventCount',
+      width: 130,
+      valueGetter: (_value, row) => {
+        const v = (row as any).eventCount;
+        const n = typeof v === 'number' ? v : Number(v ?? 0);
+        return Number.isFinite(n) ? n : 0;
+      },
+    },
+    {
+      field: 'context',
+      headerName: 'Context',
+      flex: 2,
+      minWidth: 260,
+      valueGetter: (_value, row) => String((row as any).context ?? '{}'),
+    },
+    {
+      field: 'firstSeen',
+      headerName: 'FirstSeen',
+      width: 190,
+      valueGetter: (_value, row) => {
+        const v = (row as any).firstSeen ?? (row as any).firstSeenAt;
+        if (typeof v === 'string') return v;
+        return formatMsToLocalString(v);
+      },
+    },
+    {
+      field: 'lastSeen',
+      headerName: 'LastSeen',
+      width: 190,
+      valueGetter: (_value, row) => {
+        const v = (row as any).lastSeen ?? (row as any).lastSeenAt;
+        if (typeof v === 'string') return v;
+        return formatDateToLocal(v);
+      },
+    },
+  ];
 
   const handleRowClick = (params: GridRowParams<SessionRow>) => {
-    const sessionId = params.row.sessionId;
+    const sessionId = (params.row as any).sessionId;
     if (!sessionId || typeof sessionId !== 'string') return;
     router.push(`/sessions/${encodeURIComponent(sessionId)}`);
   };
@@ -91,9 +92,7 @@ export default function TableSessions({
   return (
     <TableContainer>
       <DataGrid
-        slots={{
-          toolbar: GridToolbar,
-        }}
+        slots={{ toolbar: GridToolbar }}
         loading={isLoading}
         rows={sessions}
         columns={columns}
@@ -101,14 +100,10 @@ export default function TableSessions({
         disableRowSelectionOnClick
         onRowClick={handleRowClick}
         sx={{
-          '& .MuiDataGrid-row': {
-            cursor: 'pointer',
-          },
+          '& .MuiDataGrid-row': { cursor: 'pointer' },
         }}
         initialState={{
-          pagination: {
-            paginationModel: { page: 0, pageSize: 20 },
-          },
+          pagination: { paginationModel: { page: 0, pageSize: 20 } },
         }}
         pageSizeOptions={[10, 20, 50, 100]}
       />
