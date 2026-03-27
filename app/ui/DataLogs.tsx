@@ -6,8 +6,8 @@ import ChartLogs from "@/app/ui/ChartLogs";
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
-import { red } from '@mui/material/colors';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { getApiUrl, useApiEnv } from '@/app/lib/api-env';
 
 const theme = createTheme({
   palette: {
@@ -21,13 +21,14 @@ export default function DataTable() {
 
   const [logs, setLogs] = useState([])
   const [isLoading, setLoading] = useState(true)
+  const { apiEnv } = useApiEnv();
 
   useEffect(() => {
 
     // (1) define within effect callback scope
     const fetchData = async () => {
       setLoading(true)
-      fetch('https://hufyvhlacb.execute-api.us-west-2.amazonaws.com/logs')
+      fetch(getApiUrl('/logs', apiEnv))
         .then((res) => res.json())
         .then((data) => {
           setLogs(data.Items)
@@ -44,7 +45,7 @@ export default function DataTable() {
     fetchData();
   
     return () => clearInterval(id);
-  }, [])
+  }, [apiEnv])
 
   return (
     <ThemeProvider theme={theme}>

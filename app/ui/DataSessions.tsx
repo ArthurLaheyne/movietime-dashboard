@@ -6,9 +6,7 @@ import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import TableSessions from '@/app/ui/TableSessions';
-
-const SESSIONS_URL =
-  'https://hufyvhlacb.execute-api.us-west-2.amazonaws.com/events/sessions';
+import { getApiUrl, useApiEnv } from '@/app/lib/api-env';
 
 const theme = createTheme({
   palette: {
@@ -101,12 +99,13 @@ function toGridRows(items: unknown[]): SessionRow[] {
 export default function DataSessions() {
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [isLoading, setLoading] = useState(true);
+  const { apiEnv } = useApiEnv();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await fetch(SESSIONS_URL);
+        const res = await fetch(getApiUrl('/events/sessions', apiEnv));
         const data = await res.json();
         setSessions(toGridRows(normalizeSessions(data)));
       } catch (error) {
@@ -121,7 +120,7 @@ export default function DataSessions() {
     fetchData();
 
     return () => clearInterval(id);
-  }, []);
+  }, [apiEnv]);
 
   return (
     <ThemeProvider theme={theme}>

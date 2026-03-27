@@ -18,7 +18,7 @@ const theme = createTheme({
   },
 });
 
-type SessionEventRow = {
+type RouletteSessionEventRow = {
   id: string;
   [key: string]: unknown;
 };
@@ -31,7 +31,7 @@ function normalizeItems(payload: unknown): unknown[] {
   return [];
 }
 
-function toRows(items: unknown[]): SessionEventRow[] {
+function toRows(items: unknown[]): RouletteSessionEventRow[] {
   return items.map((item, index) => {
     const row: Record<string, unknown> =
       item && typeof item === 'object'
@@ -48,14 +48,14 @@ function toRows(items: unknown[]): SessionEventRow[] {
     const id =
       (typeof row.id === 'string' && row.id) ||
       (typeof row.sk === 'string' && row.sk) ||
-      `${index}-${String(row.ts ?? row.name ?? 'event')}`;
+      `${index}-${String(row.ts ?? row.eventName ?? row.name ?? 'event')}`;
 
-    return { id, ...row } as SessionEventRow;
+    return { id, ...row } as RouletteSessionEventRow;
   });
 }
 
-export default function DataSessionEvents({ sessionId }: { sessionId: string }) {
-  const [rows, setRows] = useState<SessionEventRow[]>([]);
+export default function DataRouletteSessionEvents({ sessionId }: { sessionId: string }) {
+  const [rows, setRows] = useState<RouletteSessionEventRow[]>([]);
   const [isLoading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { apiEnv } = useApiEnv();
@@ -65,19 +65,19 @@ export default function DataSessionEvents({ sessionId }: { sessionId: string }) 
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(getApiUrl(`/events/session/${encodeURIComponent(sessionId)}`, apiEnv));
+        const res = await fetch(
+          getApiUrl(`/admin/roulette/sessions/${encodeURIComponent(sessionId)}/events`, apiEnv),
+        );
         const data = await res.json();
         if (!res.ok) {
           setError(typeof data?.error === 'string' ? data.error : `HTTP ${res.status}`);
           setRows([]);
           return;
         }
-        console.log(toRows(normalizeItems(data)));
-        
         setRows(toRows(normalizeItems(data)));
       } catch (e) {
-        console.error('Failed to fetch session events', e);
-        setError('Failed to fetch session events');
+        console.error('Failed to fetch roulette session events', e);
+        setError('Impossible de charger les events de la session roulette');
         setRows([]);
       } finally {
         setLoading(false);
@@ -91,10 +91,12 @@ export default function DataSessionEvents({ sessionId }: { sessionId: string }) 
     <ThemeProvider theme={theme}>
       <Container maxWidth="lg">
         <Box sx={{ mb: 2 }}>
-          <Link href="/sessions">Retour aux sessions</Link>
+          <Link href="/roulette-sessions">Retour aux sessions roulette</Link>
         </Box>
         <Box sx={{ mb: 2 }}>
-          <Typography variant="h6" color="white">Session: {sessionId}</Typography>
+          <Typography variant="h6" color="white">
+            Roulette Session: {sessionId}
+          </Typography>
           {error ? (
             <Typography color="error" variant="body2">
               {error}
