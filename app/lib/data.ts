@@ -49,7 +49,8 @@ export async function fetchLogs() {
   try {
     const res = await fetch('https://hufyvhlacb.execute-api.us-west-2.amazonaws.com/logs', {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'x-admin-key': process.env.ADMIN_API_KEY_PROD ?? '',
       },
     })
     const data = await res.json()

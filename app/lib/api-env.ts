@@ -29,9 +29,14 @@ export function getApiBaseUrl(env: ApiEnv = getApiEnv()) {
   return env === 'dev' ? DEV_API_BASE_URL : PROD_API_BASE_URL;
 }
 
+// Les routes lues par le dashboard exigent la clé admin : on passe par le proxy
+// serveur (app/api/admin-proxy) au lieu d'appeler l'API depuis le navigateur.
 export function getApiUrl(pathname: string, env: ApiEnv = getApiEnv()) {
   const normalizedPath = pathname.startsWith('/') ? pathname : `/${pathname}`;
-  return `${getApiBaseUrl(env)}${normalizedPath}`;
+  const [path, query] = normalizedPath.split('?');
+  const params = new URLSearchParams(query);
+  params.set('apiEnv', env);
+  return `/api/admin-proxy${path}?${params.toString()}`;
 }
 
 export function useApiEnv() {
