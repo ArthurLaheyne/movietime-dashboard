@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // Accès au dashboard protégé par identifiant / mot de passe (Basic Auth).
 // Sans DASHBOARD_USER ou DASHBOARD_PASSWORD, tout est refusé.
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const expectedUser = process.env.DASHBOARD_USER;
   const expectedPassword = process.env.DASHBOARD_PASSWORD;
 
@@ -26,8 +26,7 @@ export function middleware(request: NextRequest) {
   });
 }
 
-// Comparaison sans arrêt au premier caractère différent (runtime edge : pas de
-// crypto.timingSafeEqual).
+// Comparaison sans arrêt au premier caractère différent.
 function safeEqual(a: string, b: string) {
   let diff = a.length ^ b.length;
   for (let i = 0; i < Math.max(a.length, b.length); i++) {

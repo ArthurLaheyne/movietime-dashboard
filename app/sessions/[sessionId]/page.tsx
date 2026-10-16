@@ -1,13 +1,14 @@
 import DataSessionEvents from '@/app/ui/DataSessionEvents';
 
-export default function SessionDetailPage({
+export default async function SessionDetailPage({
   params,
 }: {
-  params: { sessionId: string };
+  params: Promise<{ sessionId: string }>;
 }) {
+  const { sessionId } = await params;
   return (
     <main className="flex min-h-screen flex-col items-center py-10 md:p-24">
-      <DataSessionEvents sessionId={params.sessionId} />
+      <DataSessionEvents sessionId={sessionId} />
     </main>
   );
 }

@@ -18,8 +18,11 @@ const ADMIN_API_KEYS = {
 // Uniquement les lectures dont le dashboard a besoin : pas de proxy ouvert.
 const ALLOWED_PATH = /^(admin\/.+|logs|events\/.+)$/;
 
-export async function GET(request: NextRequest, { params }: { params: { path: string[] } }) {
-  const path = params.path.map(encodeURIComponent).join('/');
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ path: string[] }> },
+) {
+  const path = (await params).path.map(encodeURIComponent).join('/');
   if (!ALLOWED_PATH.test(path)) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
