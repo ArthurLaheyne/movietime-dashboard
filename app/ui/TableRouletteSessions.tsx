@@ -28,7 +28,14 @@ export default function TableRouletteSessions({
 
   const columns: GridColDef[] = [
     { field: 'sessionId', headerName: 'SessionId', flex: 1.4, minWidth: 250 },
-    { field: 'userId', headerName: 'UserId', flex: 1, minWidth: 180 },
+    {
+      field: 'userId',
+      headerName: 'UserId',
+      flex: 1,
+      minWidth: 180,
+      // userId opaque depuis S7b : l'API joint l'email du compte quand il est connu.
+      valueGetter: (_value, row) => row.email ?? row.userId,
+    },
     { field: 'eventsCount', headerName: 'Events', width: 100 },
     { field: 'moviesSwipedCount', headerName: 'Swiped', width: 100 },
     { field: 'moviesLikedCount', headerName: 'Liked', width: 90 },

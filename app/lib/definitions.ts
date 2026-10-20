@@ -15,6 +15,7 @@ export type MovieSeen = {
 export type Logs = {
   id: string;
   user: string;
+  email?: string;
   datetime: string;
   action: string;
 };
