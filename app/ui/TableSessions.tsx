@@ -42,7 +42,8 @@ export default function TableSessions({
       headerName: 'UserId',
       flex: 1,
       minWidth: 180,
-      valueGetter: (_value, row) => String((row as any).userId ?? 'anonymous'),
+      // userId opaque depuis S7b : l'API joint l'email du compte quand il est connu.
+      valueGetter: (_value, row) => String((row as any).email ?? (row as any).userId ?? 'anonymous'),
     },
     {
       field: 'eventCount',

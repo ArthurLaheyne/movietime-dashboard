@@ -42,6 +42,7 @@ export type RouletteSessionRow = {
   id: string;
   sessionId: string;
   userId: string;
+  email?: string;
   eventsCount: number;
   moviesSwipedCount: number;
   moviesLikedCount: number;
@@ -71,6 +72,7 @@ function toRows(items: unknown[]): RouletteSessionRow[] {
       id: sessionId,
       sessionId,
       userId: typeof raw.userId === 'string' && raw.userId.trim() ? raw.userId : 'anonymous',
+      email: typeof raw.email === 'string' ? raw.email : undefined,
       eventsCount: toInt(raw.eventsCount),
       moviesSwipedCount: toInt(raw.moviesSwipedCount),
       moviesLikedCount: toInt(raw.moviesLikedCount),

@@ -51,6 +51,7 @@ export type SessionRow = {
 
   // Champs visibles
   userId: string;
+  email?: string;
   eventCount: number;
   context: string;
   firstSeen: string;
@@ -88,6 +89,7 @@ function toGridRows(items: unknown[]): SessionRow[] {
       id,
       sessionId,
       userId,
+      email: typeof raw.email === 'string' ? raw.email : undefined,
       eventCount,
       context,
       firstSeen,

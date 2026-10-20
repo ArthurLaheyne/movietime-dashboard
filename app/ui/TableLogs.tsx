@@ -19,6 +19,8 @@ export default function DataTable({
       field: 'user', 
       headerName: 'User',
       flex: 1,
+      // userId opaque depuis S7b : l'API joint l'email du compte quand il est connu.
+      valueGetter: (value, row) => row.email ?? row.user,
     },
     { 
       field: 'action', 
