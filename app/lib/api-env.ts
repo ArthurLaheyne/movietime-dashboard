@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 export type ApiEnv = 'prod' | 'dev';
 
@@ -39,34 +39,21 @@ export function getApiUrl(pathname: string, env: ApiEnv = getApiEnv()) {
   return `/api/admin-proxy${path}?${params.toString()}`;
 }
 
-export function useApiEnv() {
-  const [apiEnv, setApiEnvState] = useState<ApiEnv>(() => getApiEnv());
-
-  useEffect(() => {
-    setApiEnvState(getApiEnv());
-
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key !== API_ENV_STORAGE_KEY) return;
-      setApiEnvState(getApiEnv());
-    };
-
-    const handleApiEnvChange = () => {
-      setApiEnvState(getApiEnv());
-    };
-
-    window.addEventListener('storage', handleStorage);
-    window.addEventListener(API_ENV_CHANGED_EVENT, handleApiEnvChange as EventListener);
-
-    return () => {
-      window.removeEventListener('storage', handleStorage);
-      window.removeEventListener(API_ENV_CHANGED_EVENT, handleApiEnvChange as EventListener);
-    };
-  }, []);
-
-  const updateApiEnv = (nextEnv: ApiEnv) => {
-    setApiEnv(nextEnv);
-    setApiEnvState(nextEnv);
+// Le localStorage est une source externe : useSyncExternalStore le lit sans
+// setState dans un effet, et rend 'prod' côté serveur pour l'hydratation.
+function subscribeApiEnv(onChange: () => void) {
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key === API_ENV_STORAGE_KEY) onChange();
   };
+  window.addEventListener('storage', handleStorage);
+  window.addEventListener(API_ENV_CHANGED_EVENT, onChange);
+  return () => {
+    window.removeEventListener('storage', handleStorage);
+    window.removeEventListener(API_ENV_CHANGED_EVENT, onChange);
+  };
+}
 
-  return { apiEnv, setApiEnv: updateApiEnv };
+export function useApiEnv() {
+  const apiEnv = useSyncExternalStore<ApiEnv>(subscribeApiEnv, getApiEnv, () => 'prod');
+  return { apiEnv, setApiEnv };
 }
